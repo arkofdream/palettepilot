@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "palettepilot-vision-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  /**
+   * Operational Defaults (Zero-Unapproved-Spend Policy)
+   * External AI is disabled by default.
+   * Model is strictly restricted to gemini-2.5-flash.
+   */
+  "vars": {
+    "ENABLE_EXTERNAL_AI": "false",
+    "GLOBAL_KILL_SWITCH": "false",
+    "MAX_DAILY_REQUESTS": "20",
+    "MAX_LIFETIME_REQUESTS": "100",
+    "ALLOWED_MODELS": "gemini-2.5-flash",
+    "ALLOWED_ORIGINS": "http://localhost:5173"
+  },
+
+  /**
+   * Authoritative Durable Object Budget Coordinator
+   * Serializes all quota reservations across edge instances with zero race conditions.
+   * Free-tier allowance: 1M requests/mo, 400k GB-s/mo, 1GB storage.
+   */
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "BUDGET_COORDINATOR",
+        "class_name": "BudgetCoordinatorDO"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["BudgetCoordinatorDO"]
+    }
+  ]
+}
